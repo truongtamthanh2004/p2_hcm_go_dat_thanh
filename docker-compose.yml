@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   mysql:
     image: mysql:8.0
@@ -10,7 +8,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 
@@ -40,70 +38,5 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  api-gateway:
-    build: ./services/api-gateway
-    ports:
-      - "80:80"
-    depends_on:
-      - auth-service
-      - user-service
-      - venue-service
-      - booking-service
-      - chat-service
-      - notification-service
-      - map-service
-      - statistic-service
-      - payment-service
-
-  auth-service:
-    build: ./services/auth-service
-    ports:
-      - "8081:8081"
-    environment:
-      - REDIS_HOST=redis:6379
-      - DB_HOST=mysql
-      - KAFKA_BROKER=kafka:9092
-
-  user-service:
-    build: ./services/user-service
-    ports:
-      - "8082:8082"
-
-  venue-service:
-    build: ./services/venue-service
-    ports:
-      - "8083:8083"
-
-  booking-service:
-    build: ./services/booking-service
-    ports:
-      - "8084:8084"
-
-  payment-service:
-    build: ./services/payment-service
-    ports:
-      - "8085:8085"
-
-  chat-service:
-    build: ./services/chat-service
-    ports:
-      - "8086:8086"
-
-  notification-service:
-    build: ./services/notification-service
-    ports:
-      - "8087:8087"
-
-  map-service:
-    build: ./services/map-service
-    ports:
-      - "8088:8088"
-
-  statistic-service:
-    build: ./services/statistic-service
-    ports:
-      - "8089:8089"
-
 volumes:
   mysql-data:
-
