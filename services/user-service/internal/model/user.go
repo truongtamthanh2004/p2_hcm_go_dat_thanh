@@ -12,6 +12,4 @@ type User struct {
 	AvatarURL    string `gorm:"type:varchar(512)"`
 	Role         string `gorm:"type:varchar(50);not null"` // e.g. USER, MODERATOR, ADMIN
 	IsActive     bool   `gorm:"default:true"`
-	PasswordHash string `gorm:"type:varchar(255);not null"`
-	IsVerified   bool   `gorm:"default:false"`
 }

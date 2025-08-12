@@ -1,0 +1,7 @@
+go 1.24.4
+
+use (
+	./services/auth-service
+	./services/user-service
+	./services/mail-service
+)
