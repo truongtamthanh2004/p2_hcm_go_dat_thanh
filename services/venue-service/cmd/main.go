@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"p2_hcm_go_dat_thanh/services/venue-service/config"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/handler"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/repository"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/route"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/usecase"
+	"venue-service/config"
+	"venue-service/internal/handler"
+	"venue-service/internal/repository"
+	"venue-service/internal/route"
+	"venue-service/internal/usecase"
 )
 
 func main() {

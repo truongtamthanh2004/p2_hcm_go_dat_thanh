@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"log"
-	"p2_hcm_go_dat_thanh/api-gateway/internal/i18n"
+	"api-gateway/internal/i18n"
 	"strings"
 
 	"github.com/gin-gonic/gin"

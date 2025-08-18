@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/model"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/repository"
+	"venue-service/internal/model"
+	"venue-service/internal/repository"
 )
 
 type VenueUsecase interface {

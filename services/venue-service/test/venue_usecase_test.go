@@ -3,8 +3,8 @@ package test
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/model"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/usecase"
+	"venue-service/internal/model"
+	"venue-service/internal/usecase"
 	"testing"
 )
 

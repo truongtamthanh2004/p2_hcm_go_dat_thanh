@@ -2,7 +2,7 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/model"
+	"venue-service/internal/model"
 )
 
 type VenueRepository interface {

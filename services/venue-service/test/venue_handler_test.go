@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/handler"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/model"
+	"venue-service/internal/handler"
+	"venue-service/internal/model"
 	"testing"
 
 	"github.com/gin-gonic/gin"
