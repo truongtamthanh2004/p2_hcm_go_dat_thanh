@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
+	"api-gateway/internal/middleware"
+	"api-gateway/internal/proxy"
 	"os"
-	"p2_hcm_go_dat_thanh/api-gateway/internal/proxy"
-	"p2_hcm_go_dat_thanh/packages/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(r *gin.Engine) {

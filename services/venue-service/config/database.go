@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/model"
+	"venue-service/internal/model"
 	"strconv"
 	"time"
 )

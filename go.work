@@ -4,4 +4,11 @@ use (
 	./services/auth-service
 	./services/user-service
 	./services/mail-service
+	./services/venue-service
+	./services/booking-service
+	./services/chat-service
+	./services/map-service
+	./services/notification-service
+	./services/payment-service
+	./api-gateway
 )

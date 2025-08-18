@@ -2,7 +2,7 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
-	"p2_hcm_go_dat_thanh/services/venue-service/internal/handler"
+	"venue-service/internal/handler"
 )
 
 func SetupRouter(venueHandler *handler.VenueHandler) *gin.Engine {

@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"p2_hcm_go_dat_thanh/api-gateway/utils"
+	"api-gateway/utils"
 	"strings"
 )
 

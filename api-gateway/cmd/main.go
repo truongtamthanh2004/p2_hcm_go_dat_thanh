@@ -5,10 +5,9 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"p2_hcm_go_dat_thanh/api-gateway/internal/i18n"
-	"p2_hcm_go_dat_thanh/api-gateway/internal/middleware"
-	"p2_hcm_go_dat_thanh/api-gateway/internal/routes"
-	middleware2 "p2_hcm_go_dat_thanh/packages/middleware"
+	"api-gateway/internal/i18n"
+	"api-gateway/internal/middleware"
+	"api-gateway/internal/routes"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -33,7 +32,7 @@ func initI18n() {
 func initRouter() *gin.Engine {
 	r := gin.Default()
 
-	r.Use(middleware2.LoggingMiddleware)
+	r.Use(middleware.LoggingMiddleware)
 
 	// Rate limit
 	rateLimit := 100 // default
