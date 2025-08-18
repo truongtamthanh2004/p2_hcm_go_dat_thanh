@@ -31,4 +31,5 @@ func SetupRouter(r *gin.Engine, dbConn *gorm.DB, kafkaProducer kafka.Producer) {
 	api.GET("/verify-account", authHandler.VerifyAccount)
 	api.POST("/login", authHandler.Login)
 	api.POST("/refresh-token", authHandler.RefreshToken)
+	api.POST("/reset-password", authHandler.ResetPassword)
 }

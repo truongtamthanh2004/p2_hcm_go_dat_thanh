@@ -12,7 +12,6 @@ import (
 type UserUsecase interface {
 	CreateUser(ctx context.Context, req dto.CreateUserRequest) (*dto.CreateUserResponse, error)
 }
-
 type userUsecase struct {
 	repo repository.UserRepository
 }

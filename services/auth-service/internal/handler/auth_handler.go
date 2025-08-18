@@ -145,3 +145,24 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		},
 	})
 }
+
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+	var req dto.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidRequest})
+		return
+	}
+
+	err := h.uc.SendResetPassword(c.Request.Context(), req)
+	if err != nil {
+		switch err.Error() {
+		case constant.ErrUserNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"message": constant.ErrUserNotFound})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": constant.ErrSendResetPasswordEmail})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": constant.SuccessResetPasswordSent})
+}

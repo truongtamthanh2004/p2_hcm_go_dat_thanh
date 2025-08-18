@@ -20,10 +20,10 @@ type CreateUserResponse struct {
 	Role  string `json:"role"`
 }
 
-type VerifyEmailEvent struct {
-	Email string `json:"email"`
-	Token string `json:"token"`
-	Type  string `json:"type"` // "VERIFY_EMAIL"
+type MailEvent struct {
+	Email   string            `json:"email"`
+	Type    string            `json:"type"` // "VERIFY_EMAIL"
+	Data    map[string]string `json:"data,omitempty"`
 }
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
@@ -31,6 +31,9 @@ type LoginRequest struct {
 }
 type RefreshTokenInput struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+type ResetPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
 }
 
 func IsStrongPassword(pw string) bool {
