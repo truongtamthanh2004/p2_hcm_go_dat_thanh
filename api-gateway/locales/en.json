@@ -1,5 +1,18 @@
 {
   "hello": "Hello",
   "user_not_found": "User not found",
-  "venue.not.found": "Venue not found"
+  "venue.not.found": "Venue not found",
+  "venue.created": "Venue has been created successfully",
+  "venue.found": "Venue found",
+  "venue.updated": "Venue has been updated successfully",
+  "venues.found": "Venues list found",
+  "invalid.venue.id": "Invalid venue ID",
+  "invalid.id": "Invalid ID",
+  "invalid.data": "Invalid data",
+  "notification.send_success": "Notification sent successfully",
+  "notification.get_success": "Get notifications successfully",
+  "notification.invalid_user_id": "Invalid user ID",
+  "notification.send_failed": "Failed to send notification",
+  "notification.get_failed": "Failed to retrieve notifications",
+  "notification.get_error": "Cannot get notifications"
 }
