@@ -101,7 +101,7 @@ func (u *AuthUsecase) Authenticate(ctx context.Context, loginRequest *dto.LoginR
 	if err != nil {
 		return nil, errors.New(constant.ErrInvalidCredentials)
 	}
-	
+
 	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginRequest.Password)) != nil {
 		return nil, errors.New(constant.ErrInvalidCredentials)
 	}
@@ -129,4 +129,37 @@ func (u *AuthUsecase) AuthenticateUserFromClaim(ctx context.Context, input *dto.
 	}
 
 	return user, nil
+}
+
+func (u *AuthUsecase) SendResetPassword(ctx context.Context, mailRequest dto.ResetPasswordRequest) error {
+	user, err := u.authRepo.GetByEmail(ctx, mailRequest.Email)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New(constant.ErrGetUserFailed)
+	}
+	if user == nil {
+		return errors.New(constant.ErrUserNotFound)
+	}
+
+	resetPassword, err := utils.GenerateRandomPassword(constant.PasswordLength)
+	if err != nil {
+		return errors.New(constant.ErrGeneratePassword)
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(resetPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New(constant.ErrPasswordHash)
+	}
+
+	oldPasswordHash := user.PasswordHash
+	user.PasswordHash = string(hashedPassword)
+	if err := u.authRepo.UpdateUser(ctx, user); err != nil {
+		return errors.New(constant.ErrUpdateUser)
+	}
+
+	if err := u.kafkaProd.PublishResetPasswordEvent(ctx, user.Email, resetPassword); err != nil {
+		user.PasswordHash = oldPasswordHash
+		_ = u.authRepo.UpdateUser(ctx, user)
+		return errors.New(constant.ErrSendMailFailed)
+	}
+	return nil
 }

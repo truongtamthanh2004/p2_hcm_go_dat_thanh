@@ -20,6 +20,7 @@ type mockAuthRepo struct {
 	createFn     func(ctx context.Context, user *model.AuthUser) error
 	getByEmailFn func(ctx context.Context, email string) (*model.AuthUser, error)
 	verifyUserFn func(ctx context.Context, email string) error
+	updateFn     func(ctx context.Context, user *model.AuthUser) error
 }
 
 func (m *mockAuthRepo) Create(ctx context.Context, user *model.AuthUser) error {
@@ -40,6 +41,12 @@ func (m *mockAuthRepo) VerifyUser(ctx context.Context, email string) error {
 	}
 	return nil
 }
+func (m *mockAuthRepo) UpdateUser(ctx context.Context, user *model.AuthUser) error {
+	if m.updateFn != nil {
+		return m.updateFn(ctx, user)
+	}
+	return nil
+}
 
 type mockUserClient struct {
 	createUserFn func(ctx context.Context, email, name, role string) (*dto.CreateUserResponse, error)
@@ -53,15 +60,32 @@ func (m *mockUserClient) CreateUser(ctx context.Context, email, name, role strin
 }
 
 type mockKafka struct {
-	publishFn func(ctx context.Context, email, token string) error
+	publishFn func(ctx context.Context, event dto.MailEvent) error
 }
 
-func (m *mockKafka) PublishVerificationEvent(ctx context.Context, email, token string) error {
+func (m *mockKafka) PublishMailEvent(ctx context.Context, event dto.MailEvent) error {
 	if m.publishFn != nil {
-		return m.publishFn(ctx, email, token)
+		return m.publishFn(ctx, event)
 	}
 	return nil
 }
+
+func (m *mockKafka) PublishVerificationEvent(ctx context.Context, email, token string) error {
+	return m.PublishMailEvent(ctx, dto.MailEvent{
+		Email: email,
+		Data:  map[string]string{"token": token},
+		Type:  constant.EventTypeVerifyEmail,
+	})
+}
+
+func (m *mockKafka) PublishResetPasswordEvent(ctx context.Context, email, newPassword string) error {
+	return m.PublishMailEvent(ctx, dto.MailEvent{
+		Email: email,
+		Data:  map[string]string{"newPassword": newPassword},
+		Type:  constant.EventTypeResetPassword,
+	})
+}
+
 func (m *mockKafka) Close() error { return nil }
 
 func gormErrNotFound() error {
@@ -84,7 +108,11 @@ func TestSignUp_NewUser_Success(t *testing.T) {
 			},
 		},
 		&mockKafka{
-			publishFn: func(_ context.Context, _, _ string) error { return nil },
+			publishFn: func(_ context.Context, event dto.MailEvent) error {
+				assert.Equal(t, constant.EventTypeVerifyEmail, event.Type)
+				assert.NotEmpty(t, event.Data["token"])
+				return nil
+			},
 		},
 	)
 
@@ -113,8 +141,7 @@ func TestSignUp_RepoError_ReturnsInternalServerError(t *testing.T) {
 				return nil, errors.New("db error")
 			},
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	err := uc.SignUp(context.Background(), "a@b.com", "pass", "Name")
 	assert.EqualError(t, err, constant.ErrInternalServer)
@@ -131,8 +158,7 @@ func TestVerifyAccount_ValidToken_Success(t *testing.T) {
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 			verifyUserFn: func(_ context.Context, _ string) error { return nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	err := uc.VerifyAccount(context.Background(), token)
 	assert.NoError(t, err)
@@ -152,9 +178,8 @@ func TestVerifyAccount_UserAlreadyVerified_ReturnsError(t *testing.T) {
 		&mockAuthRepo{
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
-	
+		&mockUserClient{}, &mockKafka{})
+
 	err := uc.VerifyAccount(context.Background(), token)
 	assert.EqualError(t, err, constant.ErrUserAlreadyVerified)
 }
@@ -170,8 +195,7 @@ func TestAuthenticate_ValidCredentials_Success(t *testing.T) {
 		&mockAuthRepo{
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	res, err := uc.Authenticate(context.Background(), &dto.LoginRequest{Email: "a@b.com", Password: password})
 	assert.NoError(t, err)
@@ -185,8 +209,7 @@ func TestAuthenticate_WrongPassword_ReturnsError(t *testing.T) {
 		&mockAuthRepo{
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	_, err := uc.Authenticate(context.Background(), &dto.LoginRequest{Email: "a@b.com", Password: "wrong"})
 	assert.EqualError(t, err, constant.ErrInvalidCredentials)
@@ -202,8 +225,7 @@ func TestAuthenticateUserFromClaim_ValidToken_Success(t *testing.T) {
 		&mockAuthRepo{
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	res, err := uc.AuthenticateUserFromClaim(context.Background(), &dto.RefreshTokenInput{RefreshToken: token})
 	assert.NoError(t, err)
@@ -218,9 +240,32 @@ func TestAuthenticateUserFromClaim_UserNotVerified_ReturnsError(t *testing.T) {
 		&mockAuthRepo{
 			getByEmailFn: func(_ context.Context, _ string) (*model.AuthUser, error) { return user, nil },
 		},
-		&mockUserClient{}, &mockKafka{},
-	)
+		&mockUserClient{}, &mockKafka{})
 
 	_, err := uc.AuthenticateUserFromClaim(context.Background(), &dto.RefreshTokenInput{RefreshToken: token})
 	assert.EqualError(t, err, constant.ErrUserNotVerified)
+}
+
+// -------- Reset Password --------
+
+func TestResetPassword_Success(t *testing.T) {
+	mockRepo := &mockAuthRepo{
+		getByEmailFn: func(_ context.Context, email string) (*model.AuthUser, error) {
+			return &model.AuthUser{Email: email}, nil
+		},
+		updateFn: func(_ context.Context, user *model.AuthUser) error { return nil },
+	}
+
+	mockKafka := &mockKafka{
+		publishFn: func(_ context.Context, event dto.MailEvent) error {
+			assert.Equal(t, constant.EventTypeResetPassword, event.Type)
+			assert.NotEmpty(t, event.Data["newPassword"])
+			return nil
+		},
+	}
+
+	uc := NewAuthUsecase(mockRepo, &mockUserClient{}, mockKafka)
+
+	err := uc.SendResetPassword(context.Background(), dto.ResetPasswordRequest{Email: "test@example.com"})
+	assert.NoError(t, err)
 }

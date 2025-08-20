@@ -10,7 +10,8 @@ import (
 type AuthRepository interface {
 	Create(ctx context.Context, user *model.AuthUser) error
 	GetByEmail(ctx context.Context, email string) (*model.AuthUser, error)
-	VerifyUser(ctx context.Context, email string) error 
+	VerifyUser(ctx context.Context, email string) error
+	UpdateUser(ctx context.Context, user *model.AuthUser) error
 }
 
 type authRepository struct {
@@ -41,4 +42,8 @@ func (r *authRepository) VerifyUser(ctx context.Context, email string) error {
 		Where("email = ?", email).
 		Update("is_verified", true)
 	return result.Error
+}
+
+func (r *authRepository) UpdateUser(ctx context.Context, user *model.AuthUser) error {
+	return r.db.WithContext(ctx).Where("email = ?", user.Email).Updates(user).Error
 }

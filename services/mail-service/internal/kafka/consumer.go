@@ -12,9 +12,9 @@ import (
 )
 
 type MailEvent struct {
-	Type  string `json:"type"`
-	Email string `json:"email"`
-	Token string `json:"token"`
+	Email string            `json:"email"`
+	Type  string            `json:"type"` // "VERIFY_EMAIL"
+	Data  map[string]string `json:"data,omitempty"`
 }
 
 func StartConsumer(cfg *config.MailConfig, sender *utils.MailSender) {
@@ -40,7 +40,19 @@ func StartConsumer(cfg *config.MailConfig, sender *utils.MailSender) {
 
 		switch event.Type {
 		case constant.EventTypeVerifyEmail:
-			sender.SendVerificationEmail(event.Email, event.Token)
+			token := event.Data["token"]
+			if token == "" {
+				log.Println("Missing token in verify email event")
+				continue
+			}
+			sender.SendVerificationEmail(event.Email, token)
+		case constant.EventTypeResetPassword:
+			newPassword := event.Data["newPassword"]
+			if newPassword == "" {
+				log.Println("Missing new password in reset password email event")
+				continue
+			}
+			sender.SendResetPassword(event.Email, newPassword)
 		default:
 			log.Println("Unknown mail type:", event.Type)
 		}
