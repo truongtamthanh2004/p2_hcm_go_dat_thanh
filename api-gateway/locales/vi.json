@@ -1,5 +1,18 @@
 {
   "hello": "Xin chào",
   "user_not_found": "Không tìm thấy người dùng",
-  "venue.not.found": "Không tìm thấy địa điểm"
+  "venue.not.found": "Không tìm thấy địa điểm",
+  "venue.created": "Địa điểm đã được tạo thành công",
+  "venue.found": "Tìm thấy địa điểm",
+  "venue.updated": "Địa điểm đã được cập nhật thành công",
+  "venues.found": "Danh sách địa điểm",
+  "invalid.venue.id": "ID địa điểm không hợp lệ",
+  "invalid.id": "ID không hợp lệ",
+  "invalid.data": "Dữ liệu không hợp lệ",
+  "notification.send_success": "Gửi thông báo thành công",
+  "notification.get_success": "Lấy thông báo thành công",
+  "notification.invalid_user_id": "ID người dùng không hợp lệ",
+  "notification.send_failed": "Gửi thông báo thất bại",
+  "notification.get_failed": "Lấy thông báo thất bại",
+  "notification.get_error": "Không thể lấy thông báo"
 }

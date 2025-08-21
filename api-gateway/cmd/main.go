@@ -1,13 +1,13 @@
 package main
 
 import (
+	"api-gateway/internal/i18n"
+	"api-gateway/internal/middleware"
+	"api-gateway/internal/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"api-gateway/internal/i18n"
-	"api-gateway/internal/middleware"
-	"api-gateway/internal/routes"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -33,6 +33,8 @@ func initRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.Use(middleware.LoggingMiddleware)
+	r.Use(middleware.I18nMiddleware())
+	r.Use(middleware.TranslateMiddleware())
 
 	// Rate limit
 	rateLimit := 100 // default
