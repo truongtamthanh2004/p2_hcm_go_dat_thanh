@@ -25,7 +25,7 @@ func SetupRouter(r *gin.Engine) {
 	api := r.Group("")
 	//admin
 	api.GET("/", middleware.RequireAuth("admin"), userHandler.GetUserList)
-	api.GET("/:id", middleware.RequireAuth("admin"), userHandler.GetUserByID)
+	api.GET("/:id", userHandler.GetUserByID)
 	api.PUT("/:id", middleware.RequireAuth("admin"), userHandler.UpdateUser)
 	//user
 	api.GET("/profile", middleware.RequireAuth("user"), userHandler.GetUserProfile)

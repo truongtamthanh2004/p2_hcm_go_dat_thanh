@@ -22,7 +22,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	r.Any("/api/payment/*path", middleware.AuthMiddleware(), proxy.NewReverseProxy(os.Getenv("PAYMENT_SERVICE_URL")))
 
-	r.Any("/api/chat/*path", middleware.AuthMiddleware(), proxy.NewReverseProxy(os.Getenv("CHAT_SERVICE_URL")))
+	r.Any("/api/v1/chat/*path", middleware.AuthMiddleware(), proxy.NewReverseProxy(os.Getenv("CHAT_SERVICE_URL")))
 
 	r.Any("/api/notify/*path", middleware.AuthMiddleware(), proxy.NewReverseProxy(os.Getenv("NOTIFICATION_SERVICE_URL")))
 
