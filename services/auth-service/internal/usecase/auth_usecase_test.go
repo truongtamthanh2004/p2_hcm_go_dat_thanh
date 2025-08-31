@@ -17,10 +17,11 @@ import (
 // ---------------- MOCKS ----------------
 
 type mockAuthRepo struct {
-	createFn     func(ctx context.Context, user *model.AuthUser) error
-	getByEmailFn func(ctx context.Context, email string) (*model.AuthUser, error)
-	verifyUserFn func(ctx context.Context, email string) error
-	updateFn     func(ctx context.Context, user *model.AuthUser) error
+	createFn      func(ctx context.Context, user *model.AuthUser) error
+	getByEmailFn  func(ctx context.Context, email string) (*model.AuthUser, error)
+	verifyUserFn  func(ctx context.Context, email string) error
+	updateUserFn  func(ctx context.Context, user *model.AuthUser) error
+	getByUserIDFn func(ctx context.Context, userID uint) (*model.AuthUser, error)
 }
 
 func (m *mockAuthRepo) Create(ctx context.Context, user *model.AuthUser) error {
@@ -29,23 +30,33 @@ func (m *mockAuthRepo) Create(ctx context.Context, user *model.AuthUser) error {
 	}
 	return nil
 }
+
 func (m *mockAuthRepo) GetByEmail(ctx context.Context, email string) (*model.AuthUser, error) {
 	if m.getByEmailFn != nil {
 		return m.getByEmailFn(ctx, email)
 	}
 	return nil, nil
 }
+
 func (m *mockAuthRepo) VerifyUser(ctx context.Context, email string) error {
 	if m.verifyUserFn != nil {
 		return m.verifyUserFn(ctx, email)
 	}
 	return nil
 }
+
 func (m *mockAuthRepo) UpdateUser(ctx context.Context, user *model.AuthUser) error {
-	if m.updateFn != nil {
-		return m.updateFn(ctx, user)
+	if m.updateUserFn != nil {
+		return m.updateUserFn(ctx, user)
 	}
 	return nil
+}
+
+func (m *mockAuthRepo) GetByUserID(ctx context.Context, userID uint) (*model.AuthUser, error) {
+	if m.getByUserIDFn != nil {
+		return m.getByUserIDFn(ctx, userID)
+	}
+	return nil, nil
 }
 
 type mockUserClient struct {
@@ -253,7 +264,7 @@ func TestResetPassword_Success(t *testing.T) {
 		getByEmailFn: func(_ context.Context, email string) (*model.AuthUser, error) {
 			return &model.AuthUser{Email: email}, nil
 		},
-		updateFn: func(_ context.Context, user *model.AuthUser) error { return nil },
+		updateUserFn: func(_ context.Context, user *model.AuthUser) error { return nil },
 	}
 
 	mockKafka := &mockKafka{

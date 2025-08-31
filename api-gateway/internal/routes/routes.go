@@ -9,10 +9,9 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine) {
-	r.Any("/api/auth/*path", proxy.NewReverseProxy(os.Getenv("AUTH_SERVICE_URL")))
+	r.Any("/api/v1/auth/*path", proxy.NewReverseProxy(os.Getenv("AUTH_SERVICE_URL")))
 
-	r.Any("/api/users/*path",
-		middleware.AuthMiddleware(),
+	r.Any("/api/v1/users/*path",
 		proxy.NewReverseProxy(os.Getenv("USER_SERVICE_URL")),
 	)
 

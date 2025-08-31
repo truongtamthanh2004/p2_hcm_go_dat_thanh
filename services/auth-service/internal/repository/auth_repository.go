@@ -3,6 +3,7 @@ package repository
 import (
 	"auth-service/internal/model"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -12,6 +13,7 @@ type AuthRepository interface {
 	GetByEmail(ctx context.Context, email string) (*model.AuthUser, error)
 	VerifyUser(ctx context.Context, email string) error
 	UpdateUser(ctx context.Context, user *model.AuthUser) error
+	GetByUserID(ctx context.Context, userID uint) (*model.AuthUser, error)
 }
 
 type authRepository struct {
@@ -47,3 +49,15 @@ func (r *authRepository) VerifyUser(ctx context.Context, email string) error {
 func (r *authRepository) UpdateUser(ctx context.Context, user *model.AuthUser) error {
 	return r.db.WithContext(ctx).Where("email = ?", user.Email).Updates(user).Error
 }
+
+func (r *authRepository) GetByUserID(ctx context.Context, userID uint) (*model.AuthUser, error) {
+	var authUser model.AuthUser
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).First(&authUser).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &authUser, nil
+}
+

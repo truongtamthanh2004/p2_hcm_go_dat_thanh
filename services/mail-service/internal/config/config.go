@@ -11,7 +11,7 @@ type MailConfig struct {
 	Password       string
 	Host           string
 	Port           int
-	AuthServiceURL string
+	AppBaseUrl     string
 	KafkaBroker    string
 	KafkaMailTopic string
 }
@@ -26,11 +26,11 @@ func LoadConfig() *MailConfig {
 		Password:       os.Getenv("FROM_EMAIL_PASSWORD"),
 		Host:           os.Getenv("FROM_EMAIL_SMTP_HOST"),
 		Port:           port,
-		AuthServiceURL: os.Getenv("AUTH_SERVICE_URL"),
+		AppBaseUrl:     os.Getenv("APP_BASE_URL"),
 		KafkaBroker:    os.Getenv("KAFKA_BROKERS"),
 		KafkaMailTopic: os.Getenv("KAFKA_TOPIC_VERIFY_EMAIL"),
 	}
-	if cfg.FromEmail == "" || cfg.Password == "" || cfg.Host == "" || cfg.AuthServiceURL == "" || cfg.KafkaBroker == "" || cfg.KafkaMailTopic == "" {
+	if cfg.FromEmail == "" || cfg.Password == "" || cfg.Host == "" || cfg.AppBaseUrl == "" || cfg.KafkaBroker == "" || cfg.KafkaMailTopic == "" {
 		log.Fatal("missing required email environment variables")
 	}
 	return cfg

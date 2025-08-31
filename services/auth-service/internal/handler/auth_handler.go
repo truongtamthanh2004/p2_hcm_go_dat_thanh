@@ -166,3 +166,22 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": constant.SuccessResetPasswordSent})
 }
+
+func (h *AuthHandler) UpdateAuthUser(c *gin.Context) {
+	var req dto.UpdateAuthUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidRequest})
+		return
+	}
+
+	authUser, err := h.uc.UpdateAuthUser(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "update success",
+		"data":    authUser,
+	})
+}

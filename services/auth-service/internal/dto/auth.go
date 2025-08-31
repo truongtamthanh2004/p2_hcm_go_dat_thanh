@@ -21,9 +21,9 @@ type CreateUserResponse struct {
 }
 
 type MailEvent struct {
-	Email   string            `json:"email"`
-	Type    string            `json:"type"` // "VERIFY_EMAIL"
-	Data    map[string]string `json:"data,omitempty"`
+	Email string            `json:"email"`
+	Type  string            `json:"type"` // "VERIFY_EMAIL"
+	Data  map[string]string `json:"data,omitempty"`
 }
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
@@ -45,4 +45,10 @@ func IsStrongPassword(pw string) bool {
 	hasNumber := regexp.MustCompile(`[0-9]`).MatchString(pw)
 	hasSpecial := regexp.MustCompile(`[!@#\$%\^&\*]`).MatchString(pw)
 	return hasUpper && hasLower && hasNumber && hasSpecial
+}
+
+type UpdateAuthUserRequest struct {
+	UserID uint `json:"user_id" binding:"required"`
+	Role     *string `json:"role,omitempty"`
+	IsActive *bool   `json:"is_active,omitempty"`
 }
