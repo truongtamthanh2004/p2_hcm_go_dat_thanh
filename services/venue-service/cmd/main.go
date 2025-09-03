@@ -17,7 +17,11 @@ func main() {
 	uc := usecase.NewVenueUsecase(repo)
 	h := handler.NewVenueHandler(uc)
 
-	r := route.SetupRouter(h)
+	spaceRepository := repository.NewSpaceRepository(config.DB)
+	spaceUsecase := usecase.NewSpaceUsecase(spaceRepository)
+	spaceHandler := handler.NewSpaceHandler(spaceUsecase)
+
+	r := route.SetupRouter(h, spaceHandler)
 
 	port := os.Getenv("VENUE_SERVICE_PORT")
 	if port == "" {

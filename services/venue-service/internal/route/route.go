@@ -1,11 +1,12 @@
 package route
 
 import (
-	"github.com/gin-gonic/gin"
 	"venue-service/internal/handler"
+
+	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(venueHandler *handler.VenueHandler) *gin.Engine {
+func SetupRouter(venueHandler *handler.VenueHandler, spaceHandler *handler.SpaceHandler) *gin.Engine {
 	router := gin.Default()
 	router.HandleMethodNotAllowed = true // return 405 on wrong method
 
@@ -26,6 +27,8 @@ func SetupRouter(venueHandler *handler.VenueHandler) *gin.Engine {
 		// LIST / SEARCH
 		api.GET("/", venueHandler.SearchVenues)
 	}
+
+	router.GET("/api/v1/spaces/:id", spaceHandler.GetSpaceByID)
 
 	return router
 }
