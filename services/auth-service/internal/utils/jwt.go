@@ -11,8 +11,11 @@ import (
 )
 
 type Claims struct {
-	UserID uint   `json:"user_id"`
-	Email  string `json:"email"`
+	UserID     uint   `json:"user_id"`
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+	IsActive   bool   `json:"is_active"`
+	IsVerified bool   `json:"is_verified"`
 	jwt.RegisteredClaims
 }
 
@@ -32,8 +35,11 @@ func InitJWT() {
 func GenerateAccessToken(user *model.AuthUser) (string, error) {
 	expirationTime := time.Now().Add(15 * time.Minute)
 	claims := &Claims{
-		UserID: user.ID,
-		Email:  user.Email,
+		UserID:     user.UserID,
+		Email:      user.Email,
+		Role:       user.Role,
+		IsActive:   user.IsActive,
+		IsVerified: user.IsVerified,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -47,8 +53,11 @@ func GenerateAccessToken(user *model.AuthUser) (string, error) {
 func GenerateRefreshToken(user *model.AuthUser) (string, error) {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &Claims{
-		UserID: user.ID,
-		Email:  user.Email,
+		UserID:     user.UserID,
+		Email:      user.Email,
+		Role:       user.Role,
+		IsActive:   user.IsActive,
+		IsVerified: user.IsVerified,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

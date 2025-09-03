@@ -44,8 +44,15 @@ func (u *AuthUsecase) SignUp(ctx context.Context, email, password, name string) 
 		return errors.New(constant.ErrPasswordHash)
 	}
 
-	// 3. Create auth user
+	// 3. Create user profile
+	userProfile, err := u.userClient.CreateUser(ctx, email, name, constant.USER_ROLE)
+	if err != nil {
+		return errors.New(constant.ErrCreateUserProfile)
+	}
+
+	// 4. Create auth user
 	authUser := &model.AuthUser{
+		UserID:       userProfile.ID,
 		Email:        email,
 		PasswordHash: string(hashedPassword),
 		Role:         constant.USER_ROLE,
@@ -53,11 +60,6 @@ func (u *AuthUsecase) SignUp(ctx context.Context, email, password, name string) 
 	}
 	if err := u.authRepo.Create(ctx, authUser); err != nil {
 		return errors.New(constant.ErrCreateAuthUser)
-	}
-
-	// 4. Create user profile
-	if _, err := u.userClient.CreateUser(ctx, email, name, constant.USER_ROLE); err != nil {
-		return errors.New(constant.ErrCreateUserProfile)
 	}
 
 	// 5. Generate verification token
@@ -162,4 +164,27 @@ func (u *AuthUsecase) SendResetPassword(ctx context.Context, mailRequest dto.Res
 		return errors.New(constant.ErrSendMailFailed)
 	}
 	return nil
+}
+
+func (uc *AuthUsecase) UpdateAuthUser(ctx context.Context, req dto.UpdateAuthUserRequest) (*model.AuthUser, error) {
+	authUser, err := uc.authRepo.GetByUserID(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if authUser == nil {
+		return nil, errors.New(constant.ErrUserNotFound)
+	}
+
+	if req.Role != nil {
+		authUser.Role = *req.Role
+	}
+	if req.IsActive != nil {
+		authUser.IsActive = *req.IsActive
+	}
+
+	if err := uc.authRepo.UpdateUser(ctx, authUser); err != nil {
+		return nil, err
+	}
+
+	return authUser, nil
 }

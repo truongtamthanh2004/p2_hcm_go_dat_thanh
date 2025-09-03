@@ -34,7 +34,7 @@ func (m *MailSender) SendEmail(to, subject, htmlBody string) error {
 }
 
 func (m *MailSender) SendVerificationEmail(userEmail, token string) error {
-	link := fmt.Sprintf("%s%s?token=%s", m.cfg.AuthServiceURL, constant.VerifyAccountUrl, token)
+	link := fmt.Sprintf("%s%s?token=%s", m.cfg.AppBaseUrl, constant.VerifyAccountUrl, token)
 	subject := "Verify your account"
 	html := fmt.Sprintf(`
 		<h2>Welcome!</h2>
