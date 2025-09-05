@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"payment-service/internal/model"
 	"strconv"
 	"time"
-	"venue-service/internal/model"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
@@ -87,7 +87,7 @@ func ConnectDB() {
 	sqlDB.SetMaxOpenConns(100)
 
 	DB = db
-	err = db.AutoMigrate(model.Amenity{}, model.SpaceAmenity{}, model.Venue{}, model.Space{})
+	err = db.AutoMigrate(model.PaymentTransaction{})
 	if err != nil {
 		log.Fatalf("❌ AutoMigrate failed: %v", err)
 	}

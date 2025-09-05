@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"notification-service/config"
 	"notification-service/internal/handler"
+	"notification-service/internal/kafka"
 	"notification-service/internal/repository"
 	"notification-service/internal/route"
 	"notification-service/internal/usecase"
@@ -16,6 +17,26 @@ func main() {
 	repo := repository.NewNotificationRepository(config.DB)
 	uc := usecase.NewNotificationUsecase(repo)
 	h := handler.NewNotificationHandler(uc)
+
+	brokers := os.Getenv("KAFKA_BROKERS")
+	if brokers == "" {
+		brokers = "localhost:9092"
+	}
+	topic := os.Getenv("KAFKA_TOPIC_NOTIFICATION_EVENTS")
+	if topic == "" {
+		topic = "notification-events"
+	}
+	group := os.Getenv("KAFKA_CONSUMER_GROUP_NOTIFICATION_SERVICE")
+	if group == "" {
+		group = "notification-service"
+	}
+
+	kafka.StartBookingConsumer(
+		[]string{brokers},
+		topic,
+		group,
+		uc,
+	)
 
 	r := route.SetupRouter(h)
 
