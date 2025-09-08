@@ -87,7 +87,7 @@ func ConnectDB() {
 	sqlDB.SetMaxOpenConns(100)
 
 	DB = db
-	err = db.AutoMigrate(model.Amenity{}, model.SpaceAmenity{}, model.Venue{}, model.Space{})
+	err = db.AutoMigrate(model.Amenity{}, model.VenueAmenity{}, model.Venue{}, model.Space{})
 	if err != nil {
 		log.Fatalf("❌ AutoMigrate failed: %v", err)
 	}

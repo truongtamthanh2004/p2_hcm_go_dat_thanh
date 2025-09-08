@@ -1,148 +1,204 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
-	"venue-service/internal/model"
-	"venue-service/internal/usecase"
 	"strconv"
+	"venue-service/internal/constant"
+	"venue-service/internal/dto"
+	"venue-service/internal/usecase"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type VenueHandler struct {
-	usecase usecase.VenueUsecase
+	uc usecase.VenueUsecase
 }
 
-func NewVenueHandler(u usecase.VenueUsecase) *VenueHandler {
-	return &VenueHandler{usecase: u}
-}
-
-type CreateVenueRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Address     string `json:"address" binding:"required"`
-	City        string `json:"city"`
-	Description string `json:"description"`
-}
-
-type UpdateVenueRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Address     string `json:"address" binding:"required"`
-	City        string `json:"city" binding:"required"`
-	Status      string `json:"status" binding:"required"`
-	Description string `json:"description"`
+func NewVenueHandler(uc usecase.VenueUsecase) *VenueHandler {
+	return &VenueHandler{uc}
 }
 
 func (h *VenueHandler) CreateVenue(c *gin.Context) {
-	//userID, exists := c.Get("user_id")
-	//if !exists {
-	//	c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-	//	return
-	//}
-
-	var req CreateVenueRequest
+	var req dto.CreateVenueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrBadRequest.Error()})
 		return
 	}
-
-	venue := model.Venue{
-		Name:        req.Name,
-		Address:     req.Address,
-		City:        req.City,
-		Description: req.Description,
-		//UserID:      userID.(uint),
-		Status: "pending",
-	}
-
-	if err := h.usecase.CreateVenue(&venue); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "data": []interface{}{}})
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
 		return
 	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "venue.created", "data": venue})
+	venue, err := h.uc.Create(c.Request.Context(), userID.(uint), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "venue created",
+		"data":    venue,
+	})
 }
 
-func (h *VenueHandler) GetVenue(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid.venue.id", "data": []interface{}{}})
+func (h *VenueHandler) GetVenues(c *gin.Context) {
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
 		return
 	}
-	venue, err := h.usecase.GetVenue(uint(id))
+	city := c.Query("city")
+	name := c.Query("name")
+
+	venues, err := h.uc.GetAll(c.Request.Context(), userID.(uint), city, name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "invalid.data", "data": []interface{}{}})
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "venue.found", "data": venue})
+	c.JSON(http.StatusOK, venues)
+}
+
+func (h *VenueHandler) GetVenueByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
+		return
+	}
+	venue, err := h.uc.GetByID(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, venue)
 }
 
 func (h *VenueHandler) UpdateVenue(c *gin.Context) {
-	// 1. parse id
-	id64, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid.id", "data": []interface{}{}})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
 		return
 	}
-	id := uint(id64)
-
-	// 2. bind request
-	var req UpdateVenueRequest
+	var req dto.UpdateVenueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrBadRequest.Error()})
 		return
 	}
-
-	// 3. fetch existing record
-	existing, err := h.usecase.GetVenue(id)
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
+		return
+	}
+	venue, err := h.uc.Update(c.Request.Context(), userID.(uint), uint(id), req)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"message": "venue.not.found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "data": []interface{}{}})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-
-	// 4. map allowed fields only
-	existing.Name = req.Name
-	existing.Address = req.Address
-	existing.City = req.City
-	existing.Status = req.Status
-	existing.Description = req.Description
-
-	// 5. call the existing update service (keep service unchanged)
-	if err := h.usecase.UpdateVenue(existing); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "data": []interface{}{}})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "venue.updated", "data": existing})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "venue updated",
+		"data":    venue,
+	})
 }
 
 func (h *VenueHandler) DeleteVenue(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid.venue.id", "data": []interface{}{}})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
 		return
 	}
-	
-	if err := h.usecase.DeleteVenue(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "data": []interface{}{}})
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
 		return
 	}
-	c.Status(http.StatusNoContent)
+	if err := h.uc.Delete(c.Request.Context(), userID.(uint), uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "venue deleted"})
 }
 
-func (h *VenueHandler) SearchVenues(c *gin.Context) {
-	city := c.Query("city")
-	name := c.Query("name")
-	venues, err := h.usecase.SearchVenues(city, name)
+func (h *VenueHandler) AddAmenity(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "data": []interface{}{}})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "venues.found", "data": venues})
+	var req dto.AddAmenityRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrBadRequest.Error()})
+		return
+	}
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
+		return
+	}
+	if err := h.uc.AddAmenity(c.Request.Context(), userID.(uint), uint(id), req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "amenity added"})
+}
+
+func (h *VenueHandler) RemoveAmenity(c *gin.Context) {
+	venueAmenityID, err := strconv.Atoi(c.Param("venueAmenityId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
+		return
+	}
+	userID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.ErrUnauthorized.Error()})
+		return
+	}
+	if err := h.uc.RemoveAmenity(c.Request.Context(), userID.(uint), uint(venueAmenityID)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "amenity removed"})
+}
+
+func (h *VenueHandler) ListVenues(c *gin.Context) {
+	var filter dto.FilterVenueRequest
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrBadRequest.Error()})
+		return
+	}
+
+	venues, err := h.uc.List(c.Request.Context(), filter.Status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": venues})
+}
+
+func (h *VenueHandler) ApproveVenue(c *gin.Context) {
+	venueID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
+		return
+	}
+
+	if err := h.uc.UpdateStatus(c.Request.Context(), uint(venueID), constant.APPROVED); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "venue approved"})
+}
+
+func (h *VenueHandler) BlockVenue(c *gin.Context) {
+	venueID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.ErrInvalidID.Error()})
+		return
+	}
+
+	if err := h.uc.UpdateStatus(c.Request.Context(), uint(venueID), constant.BLOCKED); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "venue blocked"})
 }

@@ -13,15 +13,18 @@ import (
 func main() {
 	config.ConnectDB()
 
-	repo := repository.NewVenueRepository(config.DB)
-	uc := usecase.NewVenueUsecase(repo)
-	h := handler.NewVenueHandler(uc)
+	venueRepository := repository.NewVenueRepository(config.DB)
+	venueUsecase := usecase.NewVenueUsecase(venueRepository)
+	venueHandler := handler.NewVenueHandler(venueUsecase)
 
 	spaceRepository := repository.NewSpaceRepository(config.DB)
-	spaceUsecase := usecase.NewSpaceUsecase(spaceRepository)
+	spaceUsecase := usecase.NewSpaceUsecase(spaceRepository, venueRepository)
 	spaceHandler := handler.NewSpaceHandler(spaceUsecase)
 
-	r := route.SetupRouter(h, spaceHandler)
+	amenityRepository := repository.NewAmenityRepository(config.DB)
+	amenityUsecase := usecase.NewAmenityUsecase(amenityRepository)
+	amenityHandler := handler.NewAmenityHandler(amenityUsecase)
+	r := route.SetupRouter(venueHandler, spaceHandler, amenityHandler)
 
 	port := os.Getenv("VENUE_SERVICE_PORT")
 	if port == "" {
