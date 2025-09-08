@@ -20,13 +20,30 @@ func NewBookingHandler(u usecase.BookingUsecase) *BookingHandler {
 	return &BookingHandler{u}
 }
 
-// POST /bookings
+type BookingRequest struct {
+	SpaceID   uint   `json:"space_id"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+}
+
+type UpdateBookingStatusRequest struct {
+	Status string `json:"status"`
+}
+
+// CreateBooking godoc
+// @Summary      Create a booking
+// @Description  User tạo booking mới cho 1 space
+// @Tags         bookings
+// @Accept       json
+// @Produce      json
+// @Param        request body BookingRequest true "Booking request"
+// @Success      201 {object} map[string]interface{} "booking created"
+// @Failure      400 {object} map[string]string "invalid input"
+// @Failure      401 {object} map[string]string "unauthorized"
+// @Failure      404 {object} map[string]string "space not found"
+// @Router       /bookings [post]
 func (h *BookingHandler) CreateBooking(c *gin.Context) {
-	var req struct {
-		SpaceID   uint   `json:"space_id"`
-		StartTime string `json:"start_time"`
-		EndTime   string `json:"end_time"`
-	}
+	var req BookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -70,7 +87,18 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "booking.created.successfully", "data": booking})
 }
 
-// PUT /bookings/:id/status
+// UpdateBookingStatus godoc
+// @Summary      Update booking status
+// @Description  Admin/Mod cập nhật trạng thái booking
+// @Tags         bookings
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "Booking ID"
+// @Param        request body UpdateBookingStatusRequest true "New status"
+// @Success      200 {object} map[string]interface{} "booking updated"
+// @Failure      400 {object} map[string]string "invalid input"
+// @Failure      500 {object} map[string]string "internal server error"
+// @Router       /bookings/{id}/status [put]
 func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -79,9 +107,7 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Status string `json:"status"`
-	}
+	var req UpdateBookingStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -100,6 +126,16 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "booking.updated.successfully", "data": booking})
 }
 
+// GetBookingByID godoc
+// @Summary      Get booking by ID
+// @Description  Lấy chi tiết 1 booking
+// @Tags         bookings
+// @Produce      json
+// @Param        id path int true "Booking ID"
+// @Success      200 {object} map[string]interface{} "booking detail"
+// @Failure      400 {object} map[string]string "invalid id"
+// @Failure      404 {object} map[string]string "not found"
+// @Router       /bookings/{id} [get]
 func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 	idStr := c.Param("id")
 	bookingID, err := strconv.Atoi(idStr)
@@ -117,7 +153,14 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
-// === USER API: GetBookingByUserID ===
+// GetBookingByUserID godoc
+// @Summary      Get bookings by user
+// @Description  Lấy tất cả booking của user hiện tại
+// @Tags         bookings
+// @Produce      json
+// @Success      200 {object} map[string]interface{} "list of bookings"
+// @Failure      401 {object} map[string]string "unauthorized"
+// @Router       /bookings/me [get]
 func (h *BookingHandler) GetBookingByUserID(c *gin.Context) {
 	userIDVal, exists := c.Get("userID")
 	if !exists {
@@ -139,7 +182,15 @@ func (h *BookingHandler) GetBookingByUserID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "bookings.fetched.successfully", "data": bookings})
 }
 
-// === ADMIN/MOD API: GetAllBooking ===
+// GetAllBooking godoc
+// @Summary      Get all bookings
+// @Description  Admin/Moderator lấy tất cả booking
+// @Tags         bookings
+// @Produce      json
+// @Success      200 {object} map[string]interface{} "list of all bookings"
+// @Failure      403 {object} map[string]string "forbidden"
+// @Failure      500 {object} map[string]string "internal server error"
+// @Router       /bookings [get]
 func (h *BookingHandler) GetAllBooking(c *gin.Context) {
 	// Có thể check role từ middleware: admin/mod mới được gọi
 	roleVal, _ := c.Get("role")

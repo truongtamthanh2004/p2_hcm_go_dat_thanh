@@ -1,0 +1,75 @@
+info:
+  contact: {}
+paths:
+  /payments/create-url:
+    get:
+      consumes:
+      - application/json
+      description: Generate a VNPAY payment URL for a booking
+      parameters:
+      - description: Booking ID
+        in: query
+        name: booking_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: payment_url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create Payment URL
+      tags:
+      - payments
+  /payments/vnpay-return:
+    get:
+      consumes:
+      - application/json
+      description: Handle VNPAY return callback after payment
+      parameters:
+      - description: Amount
+        in: query
+        name: vnp_Amount
+        required: true
+        type: string
+      - description: Transaction Ref
+        in: query
+        name: vnp_TxnRef
+        required: true
+        type: string
+      - description: Response Code
+        in: query
+        name: vnp_ResponseCode
+        required: true
+        type: string
+      - description: Secure Hash
+        in: query
+        name: vnp_SecureHash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to success/failure page
+          schema:
+            type: string
+        "400":
+          description: error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: VNPAY Return
+      tags:
+      - payments
+swagger: "2.0"

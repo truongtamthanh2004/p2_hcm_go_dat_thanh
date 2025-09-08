@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	_ "map-service/docs"
 	"map-service/internal/config"
 	"map-service/internal/handler"
 	"map-service/internal/route"

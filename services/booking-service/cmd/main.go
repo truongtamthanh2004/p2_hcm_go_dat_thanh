@@ -2,6 +2,7 @@ package main
 
 import (
 	"booking-service/config"
+	_ "booking-service/docs"
 	"booking-service/internal/handler"
 	"booking-service/internal/kafka"
 	"booking-service/internal/repository"
