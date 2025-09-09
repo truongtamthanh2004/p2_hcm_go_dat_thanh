@@ -54,6 +54,16 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	})
 }
 
+// GetUserProfile godoc
+// @Summary      Get profile of current user
+// @Description  Returns profile info of the logged-in user
+// @Tags         Users
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /users/profile [get]
 func (h *UserHandler) GetUserProfile(c *gin.Context) {
 	emailValue, exists := c.Get("userEmail")
 	if !exists {
@@ -82,6 +92,19 @@ func (h *UserHandler) GetUserProfile(c *gin.Context) {
 	})
 }
 
+// UpdateUserProfile godoc
+// @Summary      Update profile of current user
+// @Description  Update name, phone, etc. of logged-in user
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.UpdateProfileRequest  true  "Update Profile Request"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /users/profile [put]
 func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 	emailValue, exists := c.Get("userEmail")
 	if !exists {
@@ -126,6 +149,18 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 	})
 }
 
+// GetUserList godoc
+// @Summary      Get list of users (admin only)
+// @Description  Returns paginated list of users
+// @Tags         Users
+// @Produce      json
+// @Param        page   query     int  false  "Page number"
+// @Param        limit  query     int  false  "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /users [get]
 func (h *UserHandler) GetUserList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
@@ -153,6 +188,18 @@ func (h *UserHandler) GetUserList(c *gin.Context) {
 	})
 }
 
+// GetUserByID godoc
+// @Summary      Get user by ID (admin only)
+// @Description  Returns user info by ID
+// @Tags         Users
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -177,6 +224,20 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 	})
 }
 
+// UpdateUser godoc
+// @Summary      Update user role, active status by ID (admin only)
+// @Description  Update role, isactive
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int                    true  "User ID"
+// @Param        body  body      dto.UpdateUserRequest  true  "Update User Request"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      404   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /users/{id} [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.Atoi(userIDStr)

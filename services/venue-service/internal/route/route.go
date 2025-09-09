@@ -5,7 +5,10 @@ import (
 	"venue-service/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
 
 func SetupRouter(venueHandler *handler.VenueHandler, spaceHandler *handler.SpaceHandler, amenityHandler *handler.AmenityHandler) *gin.Engine {
 	r := gin.Default()
@@ -28,6 +31,7 @@ func SetupRouter(venueHandler *handler.VenueHandler, spaceHandler *handler.Space
 	s := r.Group("/api/v1/spaces")
 	{
 		s.GET("/:id", spaceHandler.GetSpace)
+		s.GET("/search", spaceHandler.SearchSpaces)
 		s.PUT("/:id", middleware.RequireAuth("user"), spaceHandler.UpdateSpace)
 		s.DELETE("/:id", middleware.RequireAuth("user"), spaceHandler.DeleteSpace)
 
@@ -38,11 +42,25 @@ func SetupRouter(venueHandler *handler.VenueHandler, spaceHandler *handler.Space
 	//admin
 	a := r.Group("/api/v1/admin/amenities")
 	{
-		a.POST("", middleware.RequireAuth("admin"), amenityHandler.CreateAmenity)
-		a.GET("", middleware.RequireAuth("admin"), amenityHandler.GetAllAmenities)
-		a.GET("/:id", middleware.RequireAuth("admin"), amenityHandler.GetAmenity)
-		a.PUT("/:id", middleware.RequireAuth("admin"), amenityHandler.UpdateAmenity)
-		a.DELETE("/:id", middleware.RequireAuth("admin"), amenityHandler.DeleteAmenity)
+		a.POST("", middleware.RequireAuth("admin", "moderator"), amenityHandler.CreateAmenity)
+		a.GET("", middleware.RequireAuth("admin", "moderator"), amenityHandler.GetAllAmenities)
+		a.GET("/:id", middleware.RequireAuth("admin", "moderator"), amenityHandler.GetAmenity)
+		a.PUT("/:id", middleware.RequireAuth("admin", "moderator"), amenityHandler.UpdateAmenity)
+		a.DELETE("/:id", middleware.RequireAuth("admin", "moderator"), amenityHandler.DeleteAmenity)
 	}
+
+	admin := r.Group("/api/v1/admin/venues")
+	{
+		// GET /admin/venues?status=pending
+		admin.GET("", middleware.RequireAuth("admin", "moderator"), venueHandler.ListVenues)
+
+		// PUT /admin/venues/:id/approve
+		admin.PUT("/:id/approve", middleware.RequireAuth("admin", "moderator"), venueHandler.ApproveVenue)
+
+		// PUT /admin/venues/:id/block
+		admin.PUT("/:id/block", middleware.RequireAuth("admin", "moderator"), venueHandler.BlockVenue)
+	}
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }

@@ -9,13 +9,15 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
 func SetupRouter(r *gin.Engine, dbConn *gorm.DB, kafkaProducer kafka.Producer) {
-	baseURL := os.Getenv("APP_BASE_URL")
+	baseURL := os.Getenv("USER_SERVICE_URL")
 	if baseURL == "" {
-		log.Fatal("missing env: APP_BASE_URL")
+		log.Fatal("missing env: USER_SERVICE_URL")
 	}
 
 	// Init dependencies
@@ -26,7 +28,7 @@ func SetupRouter(r *gin.Engine, dbConn *gorm.DB, kafkaProducer kafka.Producer) {
 	authHandler := handler.NewAuthHandler(*authUC)
 
 	// Routes
-	api := r.Group("")
+	api := r.Group("/api/v1/auth")
 	api.POST("/sign-up", authHandler.SignUp)
 	api.GET("/verify-account", authHandler.VerifyAccount)
 	api.POST("/login", authHandler.Login)
@@ -35,4 +37,6 @@ func SetupRouter(r *gin.Engine, dbConn *gorm.DB, kafkaProducer kafka.Producer) {
 
 	//user-service
 	api.PUT("/users", authHandler.UpdateAuthUser)
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

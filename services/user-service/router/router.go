@@ -10,21 +10,23 @@ import (
 	"user-service/internal/usecase"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRouter(r *gin.Engine) {
-	baseURL := os.Getenv("APP_BASE_URL")
+	baseURL := os.Getenv("AUTH_SERVICE_URL")
 	if baseURL == "" {
-		log.Fatal("missing env: APP_BASE_URL")
+		log.Fatal("missing env: AUTH_SERVICE_URL")
 	}
 	authClient := repository.NewAuthClient(baseURL)
 	userRepo := repository.NewUserRepository(db.DB)
 	userUC := usecase.NewUserUsecase(userRepo, authClient)
 	userHandler := handler.NewUserHandler(userUC)
 	// User routes
-	api := r.Group("")
+	api := r.Group("api/v1/users")
 	//admin
-	api.GET("/", middleware.RequireAuth("admin"), userHandler.GetUserList)
+	api.GET("/", middleware.RequireAuth("admin" , "moderator"), userHandler.GetUserList)
 	api.GET("/:id", userHandler.GetUserByID)
 	api.PUT("/:id", middleware.RequireAuth("admin"), userHandler.UpdateUser)
 	//user
@@ -33,4 +35,6 @@ func SetupRouter(r *gin.Engine) {
 
 	//auth-service
 	api.POST("/", userHandler.CreateUser)
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

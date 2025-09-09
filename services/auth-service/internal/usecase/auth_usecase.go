@@ -178,6 +178,7 @@ func (uc *AuthUsecase) UpdateAuthUser(ctx context.Context, req dto.UpdateAuthUse
 	if req.Role != nil {
 		authUser.Role = *req.Role
 	}
+
 	if req.IsActive != nil {
 		authUser.IsActive = *req.IsActive
 	}

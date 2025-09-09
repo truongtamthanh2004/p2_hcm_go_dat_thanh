@@ -19,6 +19,8 @@ func SetupRouter(bookingHandler *handler.BookingHandler) *gin.Engine {
 	router.GET("/api/v1/bookings/me", middleware.RequireAuth("user"), bookingHandler.GetBookingByUserID)
 	router.GET("/api/v1/bookings", middleware.RequireAuth("admin", "moderator"), bookingHandler.GetAllBooking)
 
+	router.POST("/api/v1/internal/bookings/check-availability", bookingHandler.CheckAvailability)
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router

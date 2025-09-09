@@ -2,6 +2,7 @@ package handler
 
 import (
 	"booking-service/constant"
+	"booking-service/internal/dto"
 	"booking-service/internal/usecase"
 	"errors"
 	"net/http"
@@ -207,4 +208,33 @@ func (h *BookingHandler) GetAllBooking(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "bookings.fetched.successfully", "data": bookings})
+}
+
+func (h *BookingHandler) CheckAvailability(c *gin.Context) {
+	var req dto.CheckAvailabilityRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request data"})
+		return
+	}
+
+	 // Parse string -> time.Time
+    start, err := time.Parse(time.RFC3339, req.StartTime)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid start_time"})
+        return
+    }
+    end, err := time.Parse(time.RFC3339, req.EndTime)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid end_time"})
+        return
+    }
+	unavailable, err := h.usecase.CheckAvailability(c.Request.Context(), req.SpaceIDs, start, end)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.CheckAvailabilityResponse{
+		UnavailableSpaceIDs: unavailable,
+	})
 }

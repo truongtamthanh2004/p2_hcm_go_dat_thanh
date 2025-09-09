@@ -19,6 +19,7 @@ type BookingUsecase interface {
 	GetBookingByID(id uint) (*model.Booking, error)
 	GetBookingByUserID(userID uint) ([]model.Booking, error)
 	GetAllBooking() ([]model.Booking, error)
+	CheckAvailability(ctx context.Context, spaceIDs []uint, start time.Time, end time.Time) ([]uint, error)
 }
 
 type bookingUsecase struct {
@@ -117,4 +118,18 @@ func (u *bookingUsecase) GetBookingByUserID(userID uint) ([]model.Booking, error
 
 func (u *bookingUsecase) GetAllBooking() ([]model.Booking, error) {
 	return u.repo.GetAll()
+}
+
+func (u *bookingUsecase) CheckAvailability(ctx context.Context, spaceIDs []uint, start time.Time, end time.Time) ([]uint, error) {
+	if len(spaceIDs) == 0 {
+		return []uint{}, nil
+	}
+	if start.IsZero() || end.IsZero() {
+		return []uint{}, nil
+	}
+	if !end.After(start) {
+		return []uint{}, nil
+	}
+
+	return u.repo.FindOverlaps(ctx, spaceIDs, start, end)
 }

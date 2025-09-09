@@ -26,7 +26,7 @@ const (
 )
 
 const (
-	UpdateAuthUserURL = "api/v1/auth/users"
+	UpdateAuthUserURL = "/api/v1/auth/users"
 )
 
 const (

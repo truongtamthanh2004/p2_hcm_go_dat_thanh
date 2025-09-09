@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -36,7 +37,7 @@ func (c *authClient) UpdateUser(ctx context.Context, req dto.UpdateAuthUserReque
 	if err != nil {
 		return errors.New(constant.ErrMarshalRequest)
 	}
-
+	fmt.Println(string(jsonBody))
 	// Build URL
 	fullURL, err := url.JoinPath(c.baseURL, constant.UpdateAuthUserURL)
 	if err != nil {

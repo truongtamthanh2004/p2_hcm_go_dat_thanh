@@ -1,0 +1,87 @@
+basePath: /api/v1
+host: localhost:8086
+info:
+  contact: {}
+  description: This is the chat service API for the coworking booking system.
+  title: Chat Service API
+  version: "1.0"
+paths:
+  /chat/conversations/{user2}:
+    get:
+      description: Retrieve all messages between the authenticated user and another
+        user
+      parameters:
+      - description: ID of the other user in conversation
+        in: path
+        name: user2
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of messages
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid user ID or same user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get conversation between two users
+      tags:
+      - Chat
+  /chat/ws:
+    get:
+      description: Establish a WebSocket connection for real-time messaging
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Connect to chat WebSocket
+      tags:
+      - Chat
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
