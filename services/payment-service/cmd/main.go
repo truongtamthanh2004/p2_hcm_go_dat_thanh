@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	_ "payment-service/docs"
 	"payment-service/internal/config"
 	"payment-service/internal/handler"
 	"payment-service/internal/repository"

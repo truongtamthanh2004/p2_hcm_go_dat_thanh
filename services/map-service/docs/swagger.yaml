@@ -1,0 +1,24 @@
+info:
+  contact: {}
+paths:
+  /venues:
+    get:
+      description: Get all venues with their location info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: venues list
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List Venues
+      tags:
+      - venues
+swagger: "2.0"

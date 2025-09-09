@@ -1,0 +1,177 @@
+definitions:
+  handler.BookingRequest:
+    properties:
+      end_time:
+        type: string
+      space_id:
+        type: integer
+      start_time:
+        type: string
+    type: object
+  handler.UpdateBookingStatusRequest:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /bookings:
+    get:
+      description: Admin/Moderator lấy tất cả booking
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of all bookings
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all bookings
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      description: User tạo booking mới cho 1 space
+      parameters:
+      - description: Booking request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.BookingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: booking created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: space not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a booking
+      tags:
+      - bookings
+  /bookings/{id}:
+    get:
+      description: Lấy chi tiết 1 booking
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: booking detail
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get booking by ID
+      tags:
+      - bookings
+  /bookings/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Admin/Mod cập nhật trạng thái booking
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateBookingStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: booking updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update booking status
+      tags:
+      - bookings
+  /bookings/user:
+    get:
+      description: Lấy tất cả booking của user hiện tại
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of bookings
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get bookings by user
+      tags:
+      - bookings
+swagger: "2.0"
