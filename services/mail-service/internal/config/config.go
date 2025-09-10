@@ -26,7 +26,7 @@ func LoadConfig() *MailConfig {
 		Password:       os.Getenv("FROM_EMAIL_PASSWORD"),
 		Host:           os.Getenv("FROM_EMAIL_SMTP_HOST"),
 		Port:           port,
-		AppBaseUrl:     os.Getenv("APP_BASE_URL"),
+		AppBaseUrl:     os.Getenv("AUTH_SERVICE_URL"),
 		KafkaBroker:    os.Getenv("KAFKA_BROKERS"),
 		KafkaMailTopic: os.Getenv("KAFKA_TOPIC_VERIFY_EMAIL"),
 	}

@@ -47,7 +47,7 @@ func (r *authRepository) VerifyUser(ctx context.Context, email string) error {
 }
 
 func (r *authRepository) UpdateUser(ctx context.Context, user *model.AuthUser) error {
-	return r.db.WithContext(ctx).Where("email = ?", user.Email).Updates(user).Error
+	return r.db.WithContext(ctx).Where("email = ?", user.Email).Save(user).Error
 }
 
 func (r *authRepository) GetByUserID(ctx context.Context, userID uint) (*model.AuthUser, error) {

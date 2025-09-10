@@ -19,6 +19,17 @@ func NewAuthHandler(uc usecase.AuthUsecase) *AuthHandler {
 	return &AuthHandler{uc: uc}
 }
 
+// SignUp godoc
+// @Summary Register a new user
+// @Description Create a new user with email, password and name
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.SignupRequest true "Signup request"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/sign-up [post]
 func (h *AuthHandler) SignUp(c *gin.Context) {
 	var req dto.SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -60,6 +71,18 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": constant.SuccessSignUp})
 }
 
+// VerifyAccount godoc
+// @Summary Verify account
+// @Description Verify user account with token sent via email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param token query string true "Verification token"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/verify-account [get]
 func (h *AuthHandler) VerifyAccount(c *gin.Context) {
 	tokenString := c.Query("token")
 	if tokenString == "" {
@@ -83,6 +106,18 @@ func (h *AuthHandler) VerifyAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": constant.SuccessAccountVerified})
 }
 
+// Login godoc
+// @Summary Login
+// @Description Authenticate user with email and password, return JWT tokens
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.LoginRequest true "Login request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var loginRequest dto.LoginRequest
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
@@ -119,6 +154,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+// RefreshToken godoc
+// @Summary Refresh access token
+// @Description Generate new access token from refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RefreshTokenInput true "Refresh token input"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var input dto.RefreshTokenInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -146,6 +193,18 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	})
 }
 
+// ResetPassword godoc
+// @Summary Send reset password email
+// @Description Send a password reset link to user email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResetPasswordRequest true "Reset password request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	var req dto.ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

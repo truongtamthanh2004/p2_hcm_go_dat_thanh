@@ -19,6 +19,14 @@ func NewChatHandler(chatUsecase usecase.ChatUsecase, hub *websocket.Hub) *ChatHa
 	return &ChatHandler{chatUsecase, hub}
 }
 
+// SendMessage godoc
+// @Summary Connect to chat WebSocket
+// @Description Establish a WebSocket connection for real-time messaging
+// @Tags Chat
+// @Param user_id query int true "User ID"  // nếu bạn muốn query param user_id
+// @Success 101 {string} string "Switching Protocols"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Router /chat/ws [get]
 func (h *ChatHandler) SendMessage(c *gin.Context) {
 	if err := h.hub.HandleWebSocket(c.Writer, c.Request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -28,6 +36,19 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	}
 }
 
+// GetConversation godoc
+// @Summary Get conversation between two users
+// @Description Retrieve all messages between the authenticated user and another user
+// @Tags Chat
+// @Produce json
+// @Param user2 path int true "ID of the other user in conversation"
+// @Success 200 {object} map[string]interface{} "List of messages"
+// @Failure 400 {object} map[string]string "Invalid user ID or same user"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /chat/conversations/{user2} [get]
 func (h *ChatHandler) GetConversation(c *gin.Context) {
 	user1Val, exists := c.Get("userID")
 	if !exists {

@@ -140,7 +140,7 @@ func (u *userUsecase) UpdateUser(ctx context.Context, req dto.UpdateUserRequest,
 	authReq := dto.UpdateAuthUserRequest{
 		UserID:   userID,
 		Role:     req.Role,
-		IsActive: req.IsActive,
+		IsActive: &user.IsActive,
 	}
 
 	if err := u.authClient.UpdateUser(ctx, authReq); err != nil {

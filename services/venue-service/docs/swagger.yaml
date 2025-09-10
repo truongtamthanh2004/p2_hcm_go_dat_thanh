@@ -1,0 +1,954 @@
+basePath: /api/v1
+definitions:
+  venue-service_internal_dto.AddAmenityRequest:
+    properties:
+      amenity_id:
+        type: integer
+    required:
+    - amenity_id
+    type: object
+  venue-service_internal_dto.CreateAmenityRequest:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  venue-service_internal_dto.CreateSpaceRequest:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      close_hour:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      open_hour:
+        type: string
+      price:
+        type: number
+      type:
+        enum:
+        - private_office
+        - meeting_room
+        - desk
+        type: string
+    required:
+    - capacity
+    - close_hour
+    - name
+    - open_hour
+    - price
+    - type
+    type: object
+  venue-service_internal_dto.CreateVenueRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - address
+    - name
+    type: object
+  venue-service_internal_dto.UpdateAmenityRequest:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+    type: object
+  venue-service_internal_dto.UpdateManagerRequest:
+    properties:
+      manager_id:
+        type: integer
+    required:
+    - manager_id
+    type: object
+  venue-service_internal_dto.UpdateSpaceRequest:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      close_hour:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      open_hour:
+        type: string
+      price:
+        type: number
+      type:
+        enum:
+        - private_office
+        - meeting_room
+        - desk
+        type: string
+    type: object
+  venue-service_internal_dto.UpdateVenueRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - address
+    - name
+    type: object
+host: localhost:8083
+info:
+  contact: {}
+  description: This is the venue service API for the coworking booking system.
+  title: Venue Service API
+  version: "1.0"
+paths:
+  /admin/amenities:
+    get:
+      description: Get list of all amenities (Admin/Moderator only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all amenities
+      tags:
+      - Admin Amenity
+    post:
+      consumes:
+      - application/json
+      description: Create a new amenity (Admin only)
+      parameters:
+      - description: CreateAmenityRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.CreateAmenityRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new amenity
+      tags:
+      - Admin Amenity
+  /admin/amenities/{id}:
+    delete:
+      description: Delete an amenity by ID (Admin/Moderator only)
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an amenity
+      tags:
+      - Admin Amenity
+    get:
+      description: Get detailed information of an amenity by ID (Admin/Moderator only)
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get amenity by ID
+      tags:
+      - Admin Amenity
+    put:
+      consumes:
+      - application/json
+      description: Update an existing amenity by ID (Admin/Moderator only)
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: UpdateAmenityRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.UpdateAmenityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an amenity
+      tags:
+      - Admin Amenity
+  /admin/venues:
+    get:
+      description: List venues by status (Admin/Moderator only)
+      parameters:
+      - description: 'Status filter: pending / approved / blocked'
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List venues with filter
+      tags:
+      - Admin Venue
+  /admin/venues/{id}/approve:
+    put:
+      description: Approve a venue by ID (Admin/Moderator only)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Approve a venue
+      tags:
+      - Admin Venue
+  /admin/venues/{id}/block:
+    put:
+      description: Block a venue by ID (Admin/Moderator only)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Block a venue
+      tags:
+      - Admin Venue
+  /spaces/{id}:
+    delete:
+      description: Delete a space by ID (user must be authenticated)
+      parameters:
+      - description: Space ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a space
+      tags:
+      - Space
+    get:
+      description: Retrieve detailed information of a space by ID
+      parameters:
+      - description: Space ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get space by ID
+      tags:
+      - Space
+    put:
+      consumes:
+      - application/json
+      description: Update information of a space (user must be authenticated)
+      parameters:
+      - description: Space ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: UpdateSpaceRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.UpdateSpaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a space
+      tags:
+      - Space
+  /spaces/{id}/manager:
+    put:
+      consumes:
+      - application/json
+      description: Assign or update manager for a space (user must be authenticated)
+      parameters:
+      - description: Space ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: UpdateManagerRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.UpdateManagerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update manager of a space
+      tags:
+      - Space
+  /spaces/search:
+    get:
+      description: Search spaces with filters and availability in a time range
+      parameters:
+      - description: Space name
+        in: query
+        name: name
+        type: string
+      - description: City
+        in: query
+        name: city
+        type: string
+      - description: Address
+        in: query
+        name: address
+        type: string
+      - description: Space type (private_office, meeting_room, desk)
+        in: query
+        name: type
+        type: string
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        required: true
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search spaces
+      tags:
+      - Space
+  /venues:
+    get:
+      description: Get list of venues accessible by the user
+      parameters:
+      - description: Filter by city
+        in: query
+        name: city
+        type: string
+      - description: Filter by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all venues
+      tags:
+      - Venue
+    post:
+      consumes:
+      - application/json
+      description: Create a new venue (user must be authenticated)
+      parameters:
+      - description: CreateVenueRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.CreateVenueRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new venue
+      tags:
+      - Venue
+  /venues/{id}:
+    delete:
+      description: Delete a venue by ID (user must be authenticated)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a venue
+      tags:
+      - Venue
+    get:
+      description: Get detailed info of a venue by ID
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get venue by ID
+      tags:
+      - Venue
+    put:
+      consumes:
+      - application/json
+      description: Update a venue by ID (user must be authenticated)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: UpdateVenueRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.UpdateVenueRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a venue
+      tags:
+      - Venue
+  /venues/{id}/amenities:
+    post:
+      consumes:
+      - application/json
+      description: Add an existing amenity to a venue (user must be authenticated)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: AddAmenityRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.AddAmenityRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add an amenity to a venue
+      tags:
+      - Venue Amenity
+  /venues/{id}/amenities/{venueAmenityId}:
+    delete:
+      description: Remove a specific amenity from a venue (user must be authenticated)
+      parameters:
+      - description: Venue Amenity ID
+        in: path
+        name: venueAmenityId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Remove an amenity from a venue
+      tags:
+      - Venue Amenity
+  /venues/{id}/spaces:
+    post:
+      consumes:
+      - application/json
+      description: Create a new space under a specific venue (user must be authenticated)
+      parameters:
+      - description: Venue ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: CreateSpaceRequest
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/venue-service_internal_dto.CreateSpaceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new space under a venue
+      tags:
+      - Space
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

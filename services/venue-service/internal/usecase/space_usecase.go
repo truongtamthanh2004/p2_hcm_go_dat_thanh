@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"log"
+	"time"
 	"venue-service/internal/constant"
 	"venue-service/internal/dto"
 	"venue-service/internal/model"
@@ -14,14 +16,17 @@ type SpaceUsecase interface {
 	Update(ctx context.Context, managerID, spaceID uint, req dto.UpdateSpaceRequest) (*model.Space, error)
 	Delete(ctx context.Context, managerID, spaceID uint) error
 	UpdateManager(ctx context.Context, ownerID, spaceID uint, req dto.UpdateManagerRequest) error
+
+	SearchSpaces(ctx context.Context, name, city, address, spaceType string, startTime, endTime time.Time) ([]model.Space, error)
 }
 type spaceUsecase struct {
-	repo      repository.SpaceRepository
-	venueRepo repository.VenueRepository
+	repo          repository.SpaceRepository
+	venueRepo     repository.VenueRepository
+	bookingClient repository.BookingClient
 }
 
-func NewSpaceUsecase(r repository.SpaceRepository, v repository.VenueRepository) SpaceUsecase {
-	return &spaceUsecase{repo: r, venueRepo: v}
+func NewSpaceUsecase(r repository.SpaceRepository, v repository.VenueRepository, bookingClient repository.BookingClient) SpaceUsecase {
+	return &spaceUsecase{repo: r, venueRepo: v, bookingClient: bookingClient}
 }
 
 func (uc *spaceUsecase) GetByID(ctx context.Context, id uint) (*model.Space, error) {
@@ -121,4 +126,43 @@ func (u *spaceUsecase) UpdateManager(ctx context.Context, ownerID, spaceID uint,
 	}
 	space.ManagerID = req.ManagerID
 	return u.repo.Update(ctx, space)
+}
+
+func (u *spaceUsecase) SearchSpaces(ctx context.Context, name, city, address, spaceType string, startTime, endTime time.Time) ([]model.Space, error) {
+	spaces, err := u.repo.FilterSpaces(ctx, name, city, address, spaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	if !startTime.IsZero() && !endTime.IsZero() {
+		spaceIDs := make([]uint, 0, len(spaces))
+		for _, s := range spaces {
+			spaceIDs = append(spaceIDs, s.ID)
+		}
+
+		unavailableIDs, err := u.bookingClient.CheckAvailability(ctx, spaceIDs, startTime, endTime)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Printf("Unavailable IDs from booking-service: %v", unavailableIDs)
+		for _, s := range spaces {
+			log.Printf("Space ID %d", s.ID)
+		}
+
+		unavailableMap := make(map[uint]struct{})
+		for _, id := range unavailableIDs {
+			unavailableMap[id] = struct{}{}
+		}
+
+		filtered := make([]model.Space, 0, len(spaces))
+		for _, s := range spaces {
+			if _, notAvailable := unavailableMap[s.ID]; !notAvailable {
+				filtered = append(filtered, s)
+			}
+		}
+		spaces = filtered
+	}
+
+	return spaces, nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "auth-service/docs"
 	"auth-service/internal/db"
 	"auth-service/internal/kafka"
 	"auth-service/router"
@@ -12,6 +13,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @title Auth Service API
+// @version 1.0
+// @description This is the authentication service for the coworking booking system.
+
+// @host localhost:8081
+// @BasePath /api/v1
 func main() {
 	err := godotenv.Load()
 	if err != nil {

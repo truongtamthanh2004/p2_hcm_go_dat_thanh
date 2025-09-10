@@ -2,6 +2,8 @@ package repository
 
 import (
 	"booking-service/internal/model"
+	"context"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -12,6 +14,7 @@ type BookingRepository interface {
 	Update(booking *model.Booking) error
 	GetByUserID(userID uint) ([]model.Booking, error)
 	GetAll() ([]model.Booking, error)
+	FindOverlaps(ctx context.Context, spaceIDs []uint, start, end time.Time) ([]uint, error)
 }
 
 type bookingRepository struct {
@@ -52,4 +55,19 @@ func (r *bookingRepository) GetAll() ([]model.Booking, error) {
 		return nil, err
 	}
 	return bookings, nil
+}
+
+func (r *bookingRepository) FindOverlaps(ctx context.Context, spaceIDs []uint, start, end time.Time) ([]uint, error) {
+	var result []uint
+	err := r.db.WithContext(ctx).
+		Model(&model.Booking{}).
+		Where("space_id IN ?", spaceIDs).
+		Where("status = ?", "CONFIRMED").
+		Where("start_time < ? AND end_time > ?", end, start).
+		Distinct("space_id").
+		Pluck("space_id", &result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
