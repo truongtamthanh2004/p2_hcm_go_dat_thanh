@@ -8,7 +8,7 @@ import (
 )
 
 type KafkaProducer interface {
-  Publish(ctx context.Context, key, value []byte) error
+	Publish(ctx context.Context, key, value []byte) error
 }
 
 type Producer struct {

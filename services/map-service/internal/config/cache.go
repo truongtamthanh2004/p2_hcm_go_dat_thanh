@@ -2,10 +2,11 @@ package config
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"os"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // var (
@@ -34,9 +35,10 @@ import (
 // }
 
 // // Get cache
-// func Get(key string) (string, error) {
-// 	return Rdb.Get(Ctx, key).Result()
-// }
+//
+//	func Get(key string) (string, error) {
+//		return Rdb.Get(Ctx, key).Result()
+//	}
 var Rdb *redis.Client
 
 func InitRedis(ctx context.Context) {
